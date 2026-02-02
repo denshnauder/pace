@@ -1,0 +1,15 @@
+# ROS 2 build artifacts
+build/
+install/
+log/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE settings (VS Code)
+.vscode/
+
+# Bag files (防止不小心上传巨大的录包数据)
+*.bag
+*.mcap
