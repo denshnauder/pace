@@ -1,96 +1,26 @@
-# PACE 
+# PACE Team
 
-**使用方法**：
+## 项目简介
+本仓库包含我在同济大学 PACE 车队算法组学习和参与开发的代码。项目主要分为两部分：底层的 STM32 固件驱动控制，以及上层的 ROS2 导航与控制节点。
 
-1. **默认参数运行**：
-   ```bash
-   ros2 run pace_control cmd_vel_to_serial_node
-   ```
+这是我在智能驾驶领域的入门实践，主要目的是通过实际的软硬件协同开发，理解车辆的底层控制逻辑与上层决策机制。
 
-2. **自定义参数运行**：
-   ```bash
-   ros2 run pace_control cmd_vel_to_serial_node --ros-args \
-     -p serial_port:=/dev/ttyUSB0 \
-     -p baud_rate:=115200 \
-     -p linear_threshold:=0.05 \
-     -p angular_threshold:=0.05 \
-     -p high_speed_threshold:=0.5
-   ```
+## 目录结构
+* `firmware/`: 包含 A 板和 C 板的底层嵌入式 C/C++ 驱动代码，基于 STM32 HAL 库开发。
+* `pace_ws/`: 基于 ROS2 的工作空间。
+  * `fishbot_cartographer/`: Cartographer 2D 建图与定位配置。
+  * `pace_control/`: 将 cmd_vel 速度指令转化为串口下发指令的控制节点。
 
-**参数说明**：
-- `serial_port`：串口设备路径，默认 `/dev/ttyUSB0`
-- `baud_rate`：串口波特率，默认 115200
-- `linear_threshold`：线速度阈值，默认 0.05
-- `angular_threshold`：角速度阈值，默认 0.05
-- `high_speed_threshold`：高速档阈值，默认 0.5
+## 技术栈
+* C/C++
+* ROS2 (Robot Operating System 2)
+* STM32 HAL 库 / FreeRTOS
 
-### 3. 系统启动流程
+## 当前学习与负责进展
+* 熟悉并配置了底层硬件的串口（UART）、CAN 总线及 DMA 传输。
+* 在 ROS2 环境下编写了基础的底盘通讯节点，实现速度指令的下发。
+* 正在逐步学习并尝试引入行为树（Behavior Trees）来优化复杂环境下的决策逻辑。
 
-1. **启动下位机**：
-   - 烧录两个控制板的固件（a_board 和 c_board）
-   - 连接 ST-Link 调试器
-   - 给开发板供电
-
-2. **启动上位机**：
-   - 启动 ROS 2 系统：`source /opt/ros/humble/setup.bash`
-   - 激活工作空间：`source pace_ws/install/setup.bash`
-   - 运行控制节点：`ros2 run pace_control cmd_vel_to_serial_node`
-
-3. **测试系统**：
-   - 发布速度命令：`ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}"`
-   - 查看节点状态：`ros2 node info /cmd_vel_to_serial_node`
-   - 查看话题信息：`ros2 topic info /cmd_vel`
-
-## 通讯协议
-
-### 底盘控制板 (a_board) 通讯
-- **接口**：CAN 总线
-- **波特率**：500Kbps
-- **消息格式**：
-  - 电机控制指令：ID 0x100，数据长度 8 字节
-  - 电机状态反馈：ID 0x200，数据长度 8 字节
-
-### 遥控器接收板 (c_board) 通讯
-- **接口**：UART (串口)
-- **波特率**：115200
-- **消息格式**：
-  - 遥控器数据：`RC::<ch1>,<ch2>,<ch3>,<ch4>*`
-  - 状态反馈：`RC_OK*`
-
-## 故障排除
-
-### 常见问题
-
-1. **串口连接失败**
-   - 检查串口设备是否正确连接
-   - 确认串口权限是否正确
-   - 检查串口参数设置是否匹配
-
-2. **电机无响应**
-   - 检查 CAN 总线连接是否正确
-   - 确认电机驱动是否正常
-   - 检查控制指令是否正确发送
-
-3. **ROS 2 节点启动失败**
-   - 检查依赖是否正确安装
-   - 确认工作空间是否正确激活
-   - 查看节点日志获取详细错误信息
-
-### 调试命令
-
-```bash
-# 查看串口设备
-ls /dev/ttyUSB*
-
-# 查看节点列表
-ros2 node list
-
-# 查看话题列表
-ros2 topic list
-
-# 查看节点信息
-ros2 node info /cmd_vel_to_serial_node
-
-# 查看话题数据
-ros2 topic echo /cmd_vel
-```
+## 运行说明
+固件部分使用 CMake 和 arm-none-eabi-gcc 工具链编译，或者通过 STM32CubeMX 配合相应 IDE 导入。
+ROS2 部分在 Ubuntu 22.04 (Humble) 下使用 colcon build 进行编译。
